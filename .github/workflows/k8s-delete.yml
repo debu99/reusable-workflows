@@ -1,0 +1,34 @@
+name: K8s PR Sandbox Delete
+on:
+  workflow_call:
+    inputs:
+      PR_NAME:
+        required: true
+        type: string
+      KUBE_NAMESPACE:
+        default: 'indevets-pr'
+        required: false
+        type: string
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+      KUBE_CONFIG_DATA:
+        required: true
+
+jobs:
+  kubernetes-delete:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Add kubeconfig to environment
+      run: |
+        set -e
+        test -e ~/.kube || mkdir ~/.kube
+        cat <<EOF > ~/.kube/config
+        $(printf '%s' "${{ inputs.KUBE_CONFIG_DATA }}" | base64 -d)
+        EOF
+    - uses: azure/setup-kubectl@v1
+    - name: Delete PR Deployment
+      run: |
+        set -e
+        kubectl config set-context --current --namespace=${{ inputs.KUBE_NAMESPACE }}
+        kubectl delete all,ing -l pr=${{ inputs.PR_NAME }}
