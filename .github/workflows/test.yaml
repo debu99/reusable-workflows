@@ -1,0 +1,66 @@
+
+
+
+name: Test
+
+on:
+  workflow_call:
+    inputs:
+      working_directory:
+        required: false
+        type: string
+        default: '.'
+      healthcheck_endpoint:
+        required: false
+        type: string
+        default: 'localhost:3000'
+      healthcheck_urls:
+        required: false
+        type: string
+        default: '/healthz'
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Restore dependencies cache
+        id: cache-node-modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm install
+      - name: Run tests
+        run: |
+          sudo npm run start &
+          sudo apt update -yqq && sudo apt install net-tools netcat -yqq
+          netstat -antlp | grep LISTEN
+          listening_port=`echo ${{ inputs.healthcheck_endpoints }} |awk -F':' '{print $2}'`
+          if [[ -z $listening_port ]]; then
+            listening_port=80
+          fi
+          nc -vv -w 3 127.0.0.1 $listening_port || true
+      - name: Test app
+        env:
+          URL: ${{ inputs.healthcheck_url }}
+        run: |
+          endpoints=(`echo ${{ inputs.healthcheck_endpoints }}`)
+          for endpoint in "${endpoints[@]}"; do
+            echo "[INFO] endpoint=${endpoint}"
+            status_code=$(curl --write-out '%{http_code}' -s --output /dev/null http://${URL}${endpoint})
+            if [[ $status_code == "200" ]]; then
+              echo "[INFO] status_code=${status_code}"
+            else
+              echo "[ERROR] endpoint=${endpoint} status_code=${status_code}"
+              exit 1
+            fi
+          done
