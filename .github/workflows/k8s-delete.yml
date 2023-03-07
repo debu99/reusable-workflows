@@ -22,12 +22,12 @@ jobs:
         set -e
         test -e ~/.kube || mkdir ~/.kube
         cat <<EOF > ~/.kube/config
-        $(printf '%s' "${{ inputs.KUBE_CONFIG_DATA }}" | base64 -d)
+        $(printf '%s' "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d)
         EOF
     - uses: azure/setup-kubectl@v1
     - name: debug
       run: |
-        cat ~/.kube/config
+        ls -al ~/.kube/config
         kubectl get version
         kubectl get ns
     - name: Delete PR Deployment
