@@ -71,7 +71,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ inputs.WORKFLOW_REPO }}
-          token: ${{ inputs.GIT_ACCESS_TOKEN }}
+          token: ${{ inputs.GIT_ACCESS_TOKEN || ''  }}
           path: reusable-workflow-repo
       - name: Debug
         run: |
