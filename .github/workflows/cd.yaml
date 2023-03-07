@@ -30,6 +30,8 @@ on:
     secrets:
       KUBE_CONFIG:
         required: true
+      GIT_ACCESS_TOKEN:
+        required: true
     outputs:
       helm_status:
         description: "The helm deployment status"
@@ -73,12 +75,18 @@ jobs:
           helm upgrade --install ${{ inputs.APP_NAME }} ./chart -n ${{ inputs.APP_NAMESPACE }} -f ./chart/values.yaml --set deployment.image.tag=${{ inputs.NEW_VERSION }}
           sleep 15
           echo "helm_status=$helm_status" >> $GITHUB_OUTPUT
+      - name: Checkout reusable workflow dir
+        uses: actions/checkout@v3
+        with:
+          repository: debu99/reusable-workflows
+          token: ${{ secrets.GIT_ACCESS_TOKEN }}
+          path: reusable-workflow-repo
       - name: Smoke test
         id: test
         run: |
-          echo "start smoke test..."          
-          chmod +x ./.github/scripts/function.sh
-          source ./.github/scripts/function.sh
+          echo "start smoke test..."   
+          chmod +x ${GITHUB_WORKSPACE}/reusable-workflow-repo/scripts/function.sh
+          source ${GITHUB_WORKSPACE}/reusable-workflow-repo/scripts/function.sh
           checkDeploy ${{ inputs.APP_NAME }} ${{ inputs.NEW_VERSION }} ${{ inputs.APP_NAMESPACE }}
           healthCheck ${{ inputs.APP_NAME }} ${{ inputs.APP_PORT }} ${{ inputs.HEALTHCHECK_URL }} ${{ inputs.APP_NAMESPACE }}
           echo "test_status=$test_status" >> $GITHUB_OUTPUT
