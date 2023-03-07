@@ -32,7 +32,6 @@ on:
         required: false
         type: string
       GIT_ACCESS_TOKEN:
-        default: ''
         required: false
         type: string
     secrets:
@@ -68,10 +67,17 @@ jobs:
         with:
           version: 'v3.8.2'
       - name: Checkout reusable workflow repo
+        if: github.event.inputs.GIT_ACCESS_TOKEN == ''
         uses: actions/checkout@v3
         with:
           repository: ${{ inputs.WORKFLOW_REPO }}
-          token: ${{ inputs.GIT_ACCESS_TOKEN || ''  }}
+          path: reusable-workflow-repo
+      - name: Checkout reusable workflow repo
+        if: github.event.inputs.GIT_ACCESS_TOKEN != ''
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.WORKFLOW_REPO }}
+          token: ${{ inputs.GIT_ACCESS_TOKEN }}
           path: reusable-workflow-repo
       - name: Debug
         run: |
