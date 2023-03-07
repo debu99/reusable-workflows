@@ -30,5 +30,7 @@ jobs:
     - name: Delete PR Deployment
       run: |
         set -e
+        kubectl get ns
         kubectl config set-context --current --namespace=${{ inputs.KUBE_NAMESPACE }}
+        kubectl get all
         kubectl delete all,ing -l pr=${{ inputs.PR_NAME }}
