@@ -24,13 +24,15 @@ jobs:
         cat <<EOF > ~/.kube/config
         $(printf '%s' "${{ inputs.KUBE_CONFIG_DATA }}" | base64 -d)
         EOF
-        cat ~/.kube/config
     - uses: azure/setup-kubectl@v1
+    - name: debug
+      run: |
+        cat ~/.kube/config
+        kubectl get version
+        kubectl get ns
     - name: Delete PR Deployment
       run: |
         set -e
-        kubectl get version
-        kubectl get ns
         kubectl config set-context --current --namespace=${{ inputs.KUBE_NAMESPACE }}
         kubectl get all
         kubectl delete all,ing -l pr=${{ inputs.PR_NAME }}
