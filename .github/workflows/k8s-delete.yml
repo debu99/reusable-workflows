@@ -28,7 +28,7 @@ jobs:
     - name: debug
       run: |
         ls -al ~/.kube/config
-        kubectl get version
+        kubectl version
         kubectl get ns
     - name: Delete PR Deployment
       run: |
