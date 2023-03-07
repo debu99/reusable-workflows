@@ -6,7 +6,7 @@ name: Lint
 on:
   workflow_call:
     inputs:
-      working_directory:
+      WORKING_DIR:
         required: false
         type: string
         default: '.'
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: ${{ inputs.WORKING_DIR }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

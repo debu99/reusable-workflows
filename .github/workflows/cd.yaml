@@ -3,6 +3,10 @@ name: Template_CD
 on:
   workflow_call:
     inputs:
+      WORKING_DIR:
+        required: false
+        type: string
+        default: '.'
       NEW_VERSION:
         required: true
         type: string
@@ -38,6 +42,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: ${{ inputs.ENVIRONMENT || 'non-prod' }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORKING_DIR }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

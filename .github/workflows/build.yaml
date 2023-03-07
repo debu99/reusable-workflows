@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: ${{ inputs.WORKING_DIR }}
     env:
       DOCKER_USER: ${{ inputs.DOCKER_USER }}
       DOCKER_REPO: ${{ inputs.DOCKER_REPO }}

@@ -6,15 +6,15 @@ name: Test
 on:
   workflow_call:
     inputs:
-      working_directory:
+      WORKING_DIR:
         required: false
         type: string
         default: '.'
-      healthcheck_endpoint:
+      HEALTHCHECK_ENDPOINT:
         required: false
         type: string
         default: 'localhost:3000'
-      healthcheck_urls:
+      HEALTHCHECK_URLS:
         required: false
         type: string
         default: '/healthz'
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: ${{ inputs.WORKING_DIR }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -44,16 +44,16 @@ jobs:
           sudo npm run start &
           sudo apt update -yqq && sudo apt install net-tools netcat -yqq
           netstat -antlp | grep LISTEN
-          listening_port=`echo ${{ inputs.healthcheck_endpoints }} |awk -F':' '{print $2}'`
+          listening_port=`echo ${{ inputs.HEALTHCHECK_ENDPOINT }} |awk -F':' '{print $2}'`
           if [[ -z $listening_port ]]; then
             listening_port=80
           fi
           nc -vv -w 3 127.0.0.1 $listening_port || true
       - name: Test app
         env:
-          URL: ${{ inputs.healthcheck_url }}
+          URL: ${{ inputs.HEALTHCHECK_URLS }}
         run: |
-          endpoints=(`echo ${{ inputs.healthcheck_endpoints }}`)
+          endpoints=(`echo ${{ inputs.HEALTHCHECK_ENDPOINT }}`)
           for endpoint in "${endpoints[@]}"; do
             echo "[INFO] endpoint=${endpoint}"
             status_code=$(curl --write-out '%{http_code}' -s --output /dev/null http://${URL}${endpoint})
