@@ -51,16 +51,16 @@ jobs:
           nc -vv -w 3 127.0.0.1 $listening_port || true
       - name: Test app
         env:
-          URL: ${{ inputs.HEALTHCHECK_URLS }}
+          ENDPOINT: ${{ inputs.HEALTHCHECK_ENDPOINT }}
         run: |
-          endpoints=(`echo ${{ inputs.HEALTHCHECK_ENDPOINT }}`)
-          for endpoint in "${endpoints[@]}"; do
-            echo "[INFO] endpoint=${endpoint}"
-            status_code=$(curl --write-out '%{http_code}' -s --output /dev/null http://${URL}${endpoint})
+          urls=(`echo ${{ inputs.HEALTHCHECK_URLS }}`)
+          for url in "${urls[@]}"; do
+            echo "[INFO] url=${url}"
+            status_code=$(curl --write-out '%{http_code}' -s --output /dev/null http://${ENDPOINT}${url})
             if [[ $status_code == "200" ]]; then
               echo "[INFO] status_code=${status_code}"
             else
-              echo "[ERROR] endpoint=${endpoint} status_code=${status_code}"
+              echo "[ERROR] url=${url} status_code=${status_code}"
               exit 1
             fi
           done
